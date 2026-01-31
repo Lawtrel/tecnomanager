@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/seed")
-@Profile("!prod") // Segurança: Não deixa rodar se o profile for 'prod' (opcional)
+//@Profile("!prod") // Segurança: Não deixa rodar se o profile for 'prod' (opcional)
 public class DBSeedingController {
 
     private final DBSeedingService seedingService;
