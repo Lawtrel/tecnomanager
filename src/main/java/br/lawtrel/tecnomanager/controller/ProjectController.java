@@ -8,8 +8,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/projetos")
@@ -24,6 +26,8 @@ public class ProjectController {
             @ApiResponse(responseCode = "200", description = "Projeto criado com sucesso"),
             @ApiResponse(responseCode = "400", description = "Dados inválidos fornecidos")
     })
+
+
     //Cria um novo projeto
     @PostMapping
     public Project create(@RequestBody @Valid ProjectDTO dados) {
@@ -41,7 +45,14 @@ public class ProjectController {
         return projectService.alocarMembro(idProjeto, idMembro);
     }
 
-
+    @Operation(summary = "Atualiza o status do projeto", description = "Transições para CONCLUIDO só são permitidas se todas as tarefas estiverem finalizadas.")
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<Void> atualizarStatus(@PathVariable Long id, @RequestBody Map<String, String> payload) {
+        // Extrai o status do JSON {"status": "CONCLUIDO"}
+        String novoStatus = payload.get("status");
+        projectService.atualizarStatus(id, novoStatus);
+        return ResponseEntity.noContent().build();
+    }
 
 
 

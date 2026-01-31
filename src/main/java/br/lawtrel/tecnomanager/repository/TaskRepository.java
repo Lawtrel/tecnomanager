@@ -7,4 +7,5 @@ import java.util.List;
 public interface TaskRepository extends JpaRepository<Task, Long> {
     // Buscar tarefas de um projeto específico
     List<Task> findByProjectId(Long projectId);
+    boolean existsByProjectIdAndStatusNot(Long projectId, String status);
 }

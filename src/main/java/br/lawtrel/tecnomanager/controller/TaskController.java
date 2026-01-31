@@ -31,4 +31,5 @@ public class TaskController {
     public ResponseEntity<List<Task>> listar(@PathVariable Long projetoId) {
         return ResponseEntity.ok(taskService.listarPorProjeto(projetoId));
     }
+
 }
