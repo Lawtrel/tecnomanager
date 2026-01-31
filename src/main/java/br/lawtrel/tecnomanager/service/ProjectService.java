@@ -7,6 +7,7 @@ import br.lawtrel.tecnomanager.repository.MemberRepository;
 import br.lawtrel.tecnomanager.repository.ProjectRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import br.lawtrel.tecnomanager.exception.ResourceNotFoundException;
 import java.util.List;
 
 @Service
@@ -34,11 +35,11 @@ public class ProjectService {
     public Project alocarMembro(Long idProjeto, Long idMembro) {
         //Buscar
         Project project = projectRepository.findById(idProjeto)
-                .orElseThrow(() -> new RuntimeException("Projeto não encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Projeto não encontrado"));
 
         //Buscar membro
         Member member = memberRepository.findById(idMembro)
-                .orElseThrow(() -> new RuntimeException("Membro não encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Membro não encontrado"));
 
         //Faz o Vínculo
         project.getMembers().add(member);
