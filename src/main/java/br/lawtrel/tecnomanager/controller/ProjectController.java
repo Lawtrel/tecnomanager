@@ -4,6 +4,8 @@ import br.lawtrel.tecnomanager.model.Member;
 import br.lawtrel.tecnomanager.model.Project;
 import br.lawtrel.tecnomanager.repository.MemberRepository;
 import br.lawtrel.tecnomanager.repository.ProjectRepository;
+import br.lawtrel.tecnomanager.dto.ProjectDTO;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
@@ -21,7 +23,13 @@ public class ProjectController {
 
     //Cria um novo projeto
     @PostMapping
-    public Project create(@RequestBody Project project) {
+    public Project create(@RequestBody @Valid ProjectDTO dados) {
+        //converte dto em entidade
+        Project project = new Project();
+        project.setNome(dados.nome());
+        project.setDescricao(dados.descricao());
+        project.setStatus(dados.status());
+
         return projectRepository.save(project);
     }
 
