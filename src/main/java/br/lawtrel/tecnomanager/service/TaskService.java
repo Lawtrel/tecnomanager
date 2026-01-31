@@ -55,4 +55,11 @@ public class TaskService {
         }
         return taskRepository.findByProjectId(projetoId);
     }
+
+    public Task atualizarStatus(Long id, String novoStatus) {
+        Task task = taskRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Tarefa não encontrada"));
+        task.setStatus(novoStatus);
+        return taskRepository.save(task);
+    }
 }

@@ -3,9 +3,12 @@ package br.lawtrel.tecnomanager.controller;
 import br.lawtrel.tecnomanager.dto.TaskDTO;
 import br.lawtrel.tecnomanager.model.Task;
 import br.lawtrel.tecnomanager.service.TaskService;
+import br.lawtrel.tecnomanager.repository.TaskRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.util.Map;
+
 
 import java.util.List;
 
@@ -32,4 +35,11 @@ public class TaskController {
         return ResponseEntity.ok(taskService.listarPorProjeto(projetoId));
     }
 
+    @Operation(summary = "Atualiza o status da tarefa")
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<Task> atualizarStatus(@PathVariable Long id, @RequestBody Map<String, String> payload) {
+        String novoStatus = payload.get("status");
+        Task task = taskService.atualizarStatus(id, novoStatus); // Crie esse método no Service conforme acima
+        return ResponseEntity.ok(task);
+    }
 }
