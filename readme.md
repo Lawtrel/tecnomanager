@@ -1,103 +1,128 @@
-📊 TecnoManager - API de Gestão de Projetos
-Status: 🚀 Em Desenvolvimento (MVP Completo)
+# 🚀 TecnoManager - Sistema de Gestão para Empresas Júnior
 
-API REST robusta desenvolvida para gerenciamento de membros, tarefas e projetos, simulando o ambiente de uma Empresa Júnior. Este projeto vai além do CRUD básico, focando em Arquitetura de Software, Qualidade de Código e DevOps Local.
+![Java](https://img.shields.io/badge/Java-21-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)
+![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.4-6DB33F?style=for-the-badge&logo=spring-boot&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-316192?style=for-the-badge&logo=postgresql&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-Available-2496ED?style=for-the-badge&logo=docker&logoColor=white)
 
-🛠️ Tecnologias & Arquitetura
-O projeto foi construído uotimtilizando as práticas mais modernas do ecossistema Java (2025/2026):
+> **API RESTful** desenvolvida para gerenciamento inteligente de projetos, tarefas e membros, simulando o ecossistema de uma Empresa Júnior. Focada em arquitetura limpa, regras de negócio robustas e deploy automatizado.
 
-Linguagem: Java 21 (LTS) - Utilizando Records e recursos modernos.
+---
 
-Framework: Spring Boot 3.4.
+## 📋 Sobre o Projeto
 
-Banco de Dados: PostgreSQL 16 (Produção/Dev via Docker) e H2 (Testes Automatizados).
+O **TecnoManager** vai além de um CRUD simples. Ele resolve problemas reais de integridade de dados e gestão de fluxo de trabalho. O sistema impede inconsistências lógicas (como fechar um projeto com pendências) e oferece visão gerencial através de dashboards.
 
-Versionamento de Banco: Flyway Migrations (Gerenciamento seguro de schema).
+### Principais Diferenciais:
+* **Zero Lombok:** Código Java puro e explícito, utilizando **Records** para DTOs e Getters/Setters encapsulados, garantindo compatibilidade futura e clareza.
+* **Regras de Negócio Bloqueantes:** O backend atua como guardião da consistência (Pattern *Fail Fast*).
+* **Auditoria Automática:** Rastreamento de criação e edição via JPA Auditing.
+* **Developer Experience:** Endpoint de **Auto-Seeding** para popular o banco instantaneamente em apresentações.
 
-Containerização: Docker & Docker Compose.
+---
 
-Qualidade de Código:
+## ⚙️ Funcionalidades
 
-Zero Lombok: Código Java puro e explícito para garantir compatibilidade futura e estabilidade.
+### 1. Gestão Core (Projetos & Membros)
+* Cadastro completo de Membros e Projetos.
+* Alocação de Membros em Projetos (Relacionamento `N:N`).
+* Histórico de datas (criação e atualização) automático.
 
-Bean Validation: Blindagem da API contra dados inválidos.
+### 2. Gestão de Tarefas (Tasks)
+* Criação de tarefas vinculadas a Projetos.
+* Atribuição de responsabilidade (Task ➡️ Membro).
+* Controle de Prazos e Status (`PENDENTE`, `EM_ANDAMENTO`, `CONCLUIDO`).
 
-JPA Auditing: Rastreamento automático de criação e atualização (@CreatedDate, @LastModifiedDate).
+### 3. 🛡️ Regra de Ouro (Business Logic)
+O sistema possui uma trava lógica que garante a qualidade da entrega:
+> **Regra:** É *impossível* alterar o status de um Projeto para `CONCLUIDO` se houver tarefas pendentes vinculadas a ele. O sistema retorna um erro **409 Conflict** com explicação detalhada.
 
-Documentação: Swagger UI / OpenAPI (Documentação viva).
+### 4. 📊 Dashboard Gerencial
+Endpoint exclusivo para métricas e KPIs:
+* Total de Projetos Ativos.
+* Gargalos (Tarefas Pendentes).
+* Membros Ociosos (Livres para alocação).
 
-Testes: JUnit 5 e Mockito.
+### 5. 🪄 Database Seeding (Botão Mágico)
+Endpoint `POST /seed` que limpa e repopula o banco de dados com dados fictícios prontos para demonstração/testes.
 
-⚙️ Funcionalidades Implementadas
-1. Gestão de Projetos e Membros
-   Cadastro completo (CRUD) de Projetos e Membros.
+---
 
-Alocação de Membros em Projetos (Relacionamento N:N).
+## 🛠️ Tecnologias Utilizadas
 
-Auditoria Automática: O sistema registra automaticamente quando um dado foi criado ou alterado.
+* **Linguagem:** Java 21 (LTS)
+* **Framework:** Spring Boot 3.4
+* **Banco de Dados:** PostgreSQL 16 (Produção/Docker) & H2 (Testes Rápidos)
+* **Versionamento de Banco:** Flyway Migrations
+* **Containerização:** Docker & Docker Compose
+* **Documentação:** Swagger UI (OpenAPI 3)
+* **Utils:** Bean Validation, Spring Data JPA
 
-2. Gestão de Tarefas (Task Management)
-   Criação de tarefas vinculadas a projetos.
+---
 
-Atribuição de responsabilidade (Tarefas x Membros).
+## 🚀 Como Rodar (Localmente)
 
-Controle de Prazos e Status.
+### Pré-requisitos
+* Docker & Docker Compose instalados.
+* Java 21 (Opcional se rodar via Docker).
 
-3. Regras de Negócio Blindadas 🛡️
-   Bloqueio de Conclusão: O sistema impede (Erro 409) que um projeto seja marcado como CONCLUIDO se ainda existirem tarefas pendentes. A integridade dos dados é garantida pelo Backend.
+### Passo a Passo
 
-4. Tratamento de Erros Profissional
-   Implementação do padrão RFC 7807 (Problem Details) via Global Exception Handler.
+1.  **Clone o repositório:**
+    ```bash
+    git clone [https://github.com/seu-usuario/tecnomanager.git](https://github.com/seu-usuario/tecnomanager.git)
+    cd tecnomanager
+    ```
 
-Respostas de erro JSON claras, padronizadas e sem "stack trace" exposto ao cliente.
+2.  **Suba o Banco de Dados (Postgres):**
+    ```bash
+    docker-compose up -d
+    ```
 
-5. Dashboard Gerencial 📊
-   Endpoint exclusivo para métricas (KPIs):
+3.  **Execute a Aplicação:**
+    ```bash
+    ./mvnw spring-boot:run
+    ```
 
-Total de Projetos Ativos.
+4.  **Acesse a Documentação (Swagger):**
+    🔗 [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html)
 
-Contagem de Tarefas Pendentes (Gargalos).
+---
 
-Identificação de Membros Ociosos.
+## ☁️ Deploy (Produção)
 
-🚀 Como Rodar o Projeto
-Este projeto utiliza Docker Compose para subir o banco de dados, eliminando a necessidade de instalar o PostgreSQL manualmente na sua máquina.
+O projeto contém um `Dockerfile` otimizado e está pronto para plataformas como **Railway** ou **Render**.
 
-Pré-requisitos
-Java 21 JDK
+### Variáveis de Ambiente Necessárias (Cloud)
+| Variável | Descrição | Exemplo |
+| :--- | :--- | :--- |
+| `SPRING_PROFILES_ACTIVE` | Ativa configurações de prod | `prod` |
+| `SPRING_DATASOURCE_URL` | URL JDBC do Postgres | `jdbc:postgresql://host:port/db` |
+| `SPRING_DATASOURCE_USERNAME` | Usuário do Banco | `postgres` |
+| `SPRING_DATASOURCE_PASSWORD` | Senha do Banco | `senha123` |
+| `SPRING_DATASOURCE_DRIVER_CLASS_NAME` | Força o driver correto | `org.postgresql.Driver` |
 
-Docker & Docker Compose
+---
 
-Passo a Passo
-Clone o repositório:
+## 🧪 Endpoints Principais
 
-Bash
-git clone https://github.com/seu-usuario/tecnomanager.git
-cd tecnomanager
-Suba a infraestrutura (Banco de Dados):
+| Método | Endpoint | Descrição |
+| :--- | :--- | :--- |
+| **POST** | `/seed` | **Popular Banco:** Apaga tudo e cria dados de teste. |
+| **GET** | `/dashboard` | **Relatório:** Retorna JSON com estatísticas do sistema. |
+| **PATCH** | `/projetos/{id}/status` | **Regra:** Tenta concluir projeto (valida tarefas). |
+| **POST** | `/projetos/{id}/tarefas` | Cria uma tarefa num projeto. |
 
-Bash
-docker-compose up -d
-Isso iniciará o PostgreSQL na porta 5432.
+---
 
-Execute a aplicação:
+## 📂 Estrutura do Projeto
 
-Bash
-./mvnw spring-boot:run
-(No Windows, use mvnw.cmd spring-boot:run)
-
-Acesse a Documentação (Swagger): Abra no navegador: http://localhost:8080/swagger-ui.html
-
-🧪 Rodando os Testes
-O projeto possui uma estratégia híbrida de testes. Enquanto o ambiente de desenvolvimento usa PostgreSQL (Docker), os testes rodam em H2 Database (Memória) para máxima velocidade.
-
-Bash
-./mvnw clean test
-📚 Aprendizados e Decisões Técnicas
-Migração para Java Puro: Inicialmente o projeto usava Lombok. Decidi remover a dependência para garantir controle total sobre o bytecode gerado e compatibilidade nativa com novas versões do JDK (21+), utilizando Records para DTOs e Getters/Setters explícitos nas Entidades.
-
-Dockerização: A transição de H2 local para PostgreSQL via Docker aproximou o ambiente de desenvolvimento do ambiente real de produção.
-
-State Pattern Simples: A implementação da regra de bloqueio de status demonstrou como encapsular regras de negócio complexas dentro da camada de Serviço, protegendo o domínio.
-
-Desenvolvido por Law 🚀
+```text
+src/main/java/br/lawtrel/tecnomanager
+├── config/          # Configurações (Swagger, CORS)
+├── controller/      # Camada de API (REST)
+├── dto/             # Objetos de Transferência (Java Records)
+├── exception/       # Tratamento Global de Erros (RFC 7807)
+├── model/           # Entidades JPA (Domínio)
+├── repository/      # Acesso a Dados
+└── service/         # Regras de Negócio (Onde a mágica acontece)
