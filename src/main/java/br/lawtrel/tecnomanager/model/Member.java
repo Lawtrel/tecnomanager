@@ -2,10 +2,14 @@ package br.lawtrel.tecnomanager.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
-
+@EntityListeners(AuditingEntityListener.class)
 public class Member {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -14,6 +18,13 @@ public class Member {
     private String nome;
     private String cargo;
     private String email;
+
+    @CreatedDate
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime dataCriacao;
+
+    @LastModifiedDate
+    private LocalDateTime ultimaAtualizacao;
 
     @ManyToMany
     @JoinTable(
@@ -63,5 +74,21 @@ public class Member {
 
     public void setProjects(List<Project> projects) {
         this.projects = projects;
+    }
+
+    public LocalDateTime getDataCriacao() {
+        return dataCriacao;
+    }
+
+    public void setDataCriacao(LocalDateTime dataCriacao) {
+        this.dataCriacao = dataCriacao;
+    }
+
+    public LocalDateTime getUltimaAtualizacao() {
+        return ultimaAtualizacao;
+    }
+
+    public void setUltimaAtualizacao(LocalDateTime ultimaAtualizacao) {
+        this.ultimaAtualizacao = ultimaAtualizacao;
     }
 }
