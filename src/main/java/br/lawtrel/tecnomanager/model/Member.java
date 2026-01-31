@@ -6,6 +6,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -18,6 +19,16 @@ public class Member {
     private String nome;
     private String cargo;
     private String email;
+
+    public Member() {
+    }
+
+    public Member(String nome, String cargo, String email) {
+        this.nome = nome;
+        this.cargo = cargo;
+        this.email = email;
+        this.projects = new ArrayList<>();
+    }
 
     @CreatedDate
     @Column(nullable = false, updatable = false)
