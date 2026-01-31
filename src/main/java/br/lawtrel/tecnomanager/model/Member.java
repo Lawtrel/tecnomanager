@@ -2,11 +2,9 @@ package br.lawtrel.tecnomanager.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.Data;
 import java.util.List;
 
 @Entity
-@Data
 
 public class Member {
     @Id
@@ -29,5 +27,41 @@ public class Member {
 
     public List<Project> getProjects() {
         return this.projects;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getNome() {
+        return nome;
+    }
+
+    public void setNome(String nome) {
+        this.nome = nome;
+    }
+
+    public String getCargo() {
+        return cargo;
+    }
+
+    public void setCargo(String cargo) {
+        this.cargo = cargo;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public void setProjects(List<Project> projects) {
+        this.projects = projects;
     }
 }
