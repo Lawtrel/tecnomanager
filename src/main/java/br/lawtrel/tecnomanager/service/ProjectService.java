@@ -11,9 +11,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import br.lawtrel.tecnomanager.exception.ResourceNotFoundException;
 import java.util.List;
+import java.util.Locale;
+import java.util.Set;
+import br.lawtrel.tecnomanager.exception.InvalidStatusException;
 
 @Service
 public class ProjectService {
+    private static final Set<String> STATUS_PERMITIDOS = Set.of(
+            "PLANEJAMENTO", "EM_PLANEJAMENTO", "INICIADO", "EM_ANDAMENTO", "CONCLUIDO");
 
     @Autowired
     private ProjectRepository projectRepository;
@@ -28,7 +33,7 @@ public class ProjectService {
         Project project = new Project();
         project.setNome(dados.nome());
         project.setDescricao(dados.descricao());
-        project.setStatus(dados.status());
+        project.setStatus(normalizarStatus(dados.status()));
 
         return projectRepository.save(project);
     }
@@ -56,11 +61,9 @@ public class ProjectService {
     }
 
     public void atualizarStatus(Long id, String novoStatus) {
+        String statusNormalizado = normalizarStatus(novoStatus);
         Project project = projectRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Projeto não encontrado com ID: " + id));
-
-        // Normaliza para maiúsculo (evita erro se mandarem "concluido")
-        String statusNormalizado = novoStatus.toUpperCase();
 
         if ("CONCLUIDO".equals(statusNormalizado)) {
             // ...verifica se existe alguma tarefa que NÃO seja "CONCLUIDO"
@@ -73,5 +76,16 @@ public class ProjectService {
 
         project.setStatus(statusNormalizado);
         projectRepository.save(project);
+    }
+
+    private String normalizarStatus(String status) {
+        if (status == null || status.isBlank()) {
+            throw new InvalidStatusException("O status do projeto é obrigatório.");
+        }
+        String normalizado = status.strip().toUpperCase(Locale.ROOT);
+        if (!STATUS_PERMITIDOS.contains(normalizado)) {
+            throw new InvalidStatusException("Status inválido. Use PLANEJAMENTO, EM_PLANEJAMENTO, INICIADO, EM_ANDAMENTO ou CONCLUIDO.");
+        }
+        return normalizado;
     }
 }
