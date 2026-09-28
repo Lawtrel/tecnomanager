@@ -1,9 +1,12 @@
 package br.lawtrel.tecnomanager.infra;
 
 import br.lawtrel.tecnomanager.exception.BusinessRuleException;
+import br.lawtrel.tecnomanager.exception.InvalidStatusException;
 import br.lawtrel.tecnomanager.exception.ResourceNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
+import org.springframework.web.ErrorResponse;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -13,6 +16,13 @@ import java.time.LocalDateTime;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(InvalidStatusException.class)
+    public ProblemDetail handleInvalidStatus(InvalidStatusException e) {
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, e.getMessage());
+        problem.setTitle("Status inválido");
+        return problem;
+    }
 
     // 1. Trata erro de "Recurso Não Encontrado" (404)
     @ExceptionHandler(ResourceNotFoundException.class)
@@ -41,11 +51,19 @@ public class GlobalExceptionHandler {
     // 3. Trata qualquer outro erro inesperado (500)
     @ExceptionHandler(Exception.class)
     public ProblemDetail handleGeneralException(Exception e) {
+        if (e instanceof ErrorResponse response) {
+            return response.getBody();
+        }
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, "Ocorreu um erro interno no servidor.");
         problemDetail.setTitle("Erro Interno");
         problemDetail.setProperty("timestamp", LocalDateTime.now());
         e.printStackTrace(); // Loga o erro no console para você ver
         return problemDetail;
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ProblemDetail handleUnreadableBody(HttpMessageNotReadableException e) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Corpo da requisição inválido.");
     }
 
     @ExceptionHandler(BusinessRuleException.class)
