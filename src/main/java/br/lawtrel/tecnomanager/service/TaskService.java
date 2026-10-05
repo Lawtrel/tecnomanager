@@ -2,6 +2,7 @@ package br.lawtrel.tecnomanager.service;
 
 import br.lawtrel.tecnomanager.dto.TaskDTO;
 import br.lawtrel.tecnomanager.exception.ResourceNotFoundException;
+import br.lawtrel.tecnomanager.exception.InvalidStatusException;
 import br.lawtrel.tecnomanager.model.Member;
 import br.lawtrel.tecnomanager.model.Project;
 import br.lawtrel.tecnomanager.model.Task;
@@ -11,9 +12,12 @@ import br.lawtrel.tecnomanager.repository.TaskRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Locale;
+import java.util.Set;
 
 @Service
 public class TaskService {
+    private static final Set<String> STATUS_PERMITIDOS = Set.of("PENDENTE", "EM_ANDAMENTO", "CONCLUIDO");
 
     private final TaskRepository taskRepository;
     private final ProjectRepository projectRepository;
@@ -34,7 +38,7 @@ public class TaskService {
         Task task = new Task();
         task.setTitulo(dados.titulo());
         task.setDescricao(dados.descricao());
-        task.setStatus(dados.status() != null ? dados.status() : "PENDENTE");
+        task.setStatus(normalizarStatus(dados.status() == null ? "PENDENTE" : dados.status()));
         task.setDataLimite(dados.dataLimite());
         task.setProject(project);
 
@@ -56,10 +60,25 @@ public class TaskService {
         return taskRepository.findByProjectId(projetoId);
     }
 
-    public Task atualizarStatus(Long id, String novoStatus) {
+    public Task atualizarStatus(Long projetoId, Long id, String novoStatus) {
         Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Tarefa não encontrada"));
-        task.setStatus(novoStatus);
+        if (!task.getProject().getId().equals(projetoId)) {
+            throw new ResourceNotFoundException("Tarefa não encontrada neste projeto");
+        }
+        task.setStatus(normalizarStatus(novoStatus));
         return taskRepository.save(task);
+    }
+
+    private String normalizarStatus(String status) {
+        if (status == null || status.isBlank()) {
+            throw new InvalidStatusException("O status da tarefa é obrigatório.");
+        }
+        String normalized = status.strip().toUpperCase(Locale.ROOT);
+        if ("CONCLUIDA".equals(normalized)) normalized = "CONCLUIDO";
+        if (!STATUS_PERMITIDOS.contains(normalized)) {
+            throw new InvalidStatusException("Status inválido. Use PENDENTE, EM_ANDAMENTO ou CONCLUIDO.");
+        }
+        return normalized;
     }
 }

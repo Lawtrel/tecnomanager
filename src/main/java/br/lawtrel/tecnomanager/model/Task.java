@@ -19,7 +19,8 @@ public class Task {
     @Column(nullable = false)
     private String titulo;
     private String descricao;
-    private String status; // PENDENTE, EM_ANDAMENTO, CONCLUIDA
+    @Column(nullable = false, length = 50)
+    private String status; // PENDENTE, EM_ANDAMENTO, CONCLUIDO
     private LocalDateTime dataLimite;
 
     @ManyToOne

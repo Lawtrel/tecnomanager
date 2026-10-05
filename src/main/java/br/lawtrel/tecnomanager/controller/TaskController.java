@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.Map;
+import jakarta.validation.Valid;
 
 
 import java.util.List;
@@ -24,7 +25,7 @@ public class TaskController {
 
     @Operation(summary = "Cria uma nova tarefa no projeto")
     @PostMapping
-    public ResponseEntity<Task> criar(@PathVariable Long projetoId, @RequestBody TaskDTO dados) {
+    public ResponseEntity<Task> criar(@PathVariable Long projetoId, @Valid @RequestBody TaskDTO dados) {
         Task task = taskService.criarTarefa(projetoId, dados);
         return ResponseEntity.ok(task);
     }
@@ -37,9 +38,9 @@ public class TaskController {
 
     @Operation(summary = "Atualiza o status da tarefa")
     @PatchMapping("/{id}/status")
-    public ResponseEntity<Task> atualizarStatus(@PathVariable Long id, @RequestBody Map<String, String> payload) {
+    public ResponseEntity<Task> atualizarStatus(@PathVariable Long projetoId, @PathVariable Long id, @RequestBody Map<String, String> payload) {
         String novoStatus = payload.get("status");
-        Task task = taskService.atualizarStatus(id, novoStatus); // Crie esse método no Service conforme acima
+        Task task = taskService.atualizarStatus(projetoId, id, novoStatus);
         return ResponseEntity.ok(task);
     }
 }
