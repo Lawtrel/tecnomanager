@@ -4,6 +4,12 @@ API REST para organizar projetos, tarefas e membros de uma empresa júnior. O pr
 
 **Java 21 · Spring Boot 3.4 · Spring Data JPA · PostgreSQL · Flyway · OpenAPI**
 
+## Documentação da API
+
+![Swagger da API TecnoManager com rotas de projetos e tarefas](docs/images/swagger-api.jpg)
+
+Captura real do Swagger em execução local, com banco H2 descartável. A documentação apresenta as rotas, os contratos de entrada e as respostas da API. Os testes com PostgreSQL estão descritos na seção de integração.
+
 ## O que o código implementa
 
 - Cadastro de projetos e membros, com associação entre eles.
@@ -107,11 +113,10 @@ try {
 
 Use uma sessão dedicada para esses comandos. Os testes de contexto recusam URLs diferentes do H2 em memória previsto ou desse destino PostgreSQL exato, com usuário `tecnomanager_test`, antes de inicializar Flyway. As operações HTTP de integração usam transações revertidas ao final. A suíte confirma também o produto do banco pela conexão JDBC, evitando chamar H2 de PostgreSQL real.
 
-Em 05/10/2026, a revisão complementar passou localmente com **36 testes em H2 e os mesmos 36 testes em PostgreSQL 16.15, zero falhas, erros ou testes ignorados, e empacotamento concluído nos dois bancos**. No PostgreSQL, as duas migrações Flyway foram aplicadas a um banco vazio e o Hibernate validou o schema. O workflow `.github/workflows/ci.yml` foi ampliado para dois jobs: H2 e PostgreSQL 16, ambos com `verify` a cada push e pull request. Os cinco checks do commit `8164468` passaram no PR #2.
+Em 05/10/2026, a revisão complementar passou localmente com **36 testes em H2 e os mesmos 36 testes em PostgreSQL 16.15, zero falhas, erros ou testes ignorados, e empacotamento concluído nos dois bancos**. No PostgreSQL, as duas migrações Flyway foram aplicadas a um banco vazio e o Hibernate validou o schema. O workflow `.github/workflows/ci.yml` foi ampliado para dois jobs: H2 e PostgreSQL 16, ambos com `verify` a cada push e pull request. Os cinco checks da versão final `ad0a69a` passaram no PR #2, integrado em 05/10/2026. Essa versão inclui o teste de migração V3, totalizando 37 testes em cada banco.
 
 ## Próximos passos
 
-- Conferir os checks do commit com a migração V3 no PR #2 antes da integração.
 - Revisar autenticação e autorização antes de disponibilizar dados reais.
 - Testar concorrência entre a conclusão de projetos e alterações de tarefas; a suíte atual cobre cenários sequenciais.
 - Padronizar o domínio de status de projetos e tarefas em uma evolução compatível da API.
