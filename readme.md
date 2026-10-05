@@ -82,6 +82,10 @@ Validação local em 26/09/2026: **26 testes, nenhuma falha, nenhum erro, nenhum
 
 Status de tarefas: `PENDENTE`, `EM_ANDAMENTO` e `CONCLUIDO`. A API aceita `CONCLUIDA` como alias e salva `CONCLUIDO`, compatível com as consultas do painel e com a regra de conclusão do projeto. Espaços e letras minúsculas são normalizados. A atualização verifica que a tarefa pertence ao projeto indicado na URL.
 
+A migração V3 normaliza dados anteriores: `CONCLUIDA` vira `CONCLUIDO`, valores reconhecidos recebem maiúsculas e espaços são removidos. Status nulos, vazios ou desconhecidos viram `PENDENTE`, exigindo revisão em vez de permitir conclusão automática. O banco passa a exigir status não nulo e restrito aos três valores canônicos. Não edite migrações V1/V2 já aplicadas.
+
+Um teste de atualização cria um schema separado no banco descartável, aplica V1/V2, insere seis registros legados e executa V3. Confere os resultados, a contagem de pendências e a rejeição de status inválidos diretamente pelo banco. Com essa correção, 37 testes passaram em H2 e os mesmos 37 em PostgreSQL 16.15, com zero falhas, erros ou testes ignorados e empacotamento concluído em ambos. O teste de atualização validou V1/V2 para V3 com dados legados nos dois bancos.
+
 ### Integração com PostgreSQL 16
 
 O `compose.test.yaml` fornece um banco separado, em memória temporária do container, na porta de loopback 55435. Não utiliza o banco de desenvolvimento da porta 5432. Dentro de um PowerShell no repositório:
@@ -103,11 +107,11 @@ try {
 
 Use uma sessão dedicada para esses comandos. Os testes de contexto recusam URLs diferentes do H2 em memória previsto ou desse destino PostgreSQL exato, com usuário `tecnomanager_test`, antes de inicializar Flyway. As operações HTTP de integração usam transações revertidas ao final. A suíte confirma também o produto do banco pela conexão JDBC, evitando chamar H2 de PostgreSQL real.
 
-Em 05/10/2026, a revisão complementar passou localmente com **36 testes em H2 e os mesmos 36 testes em PostgreSQL 16.15, zero falhas, erros ou testes ignorados, e empacotamento concluído nos dois bancos**. No PostgreSQL, as duas migrações Flyway foram aplicadas a um banco vazio e o Hibernate validou o schema. O workflow `.github/workflows/ci.yml` foi ampliado para dois jobs: H2 e PostgreSQL 16, ambos com `verify` a cada push e pull request; os checks dessa revisão ainda precisam ser conferidos após publicação.
+Em 05/10/2026, a revisão complementar passou localmente com **36 testes em H2 e os mesmos 36 testes em PostgreSQL 16.15, zero falhas, erros ou testes ignorados, e empacotamento concluído nos dois bancos**. No PostgreSQL, as duas migrações Flyway foram aplicadas a um banco vazio e o Hibernate validou o schema. O workflow `.github/workflows/ci.yml` foi ampliado para dois jobs: H2 e PostgreSQL 16, ambos com `verify` a cada push e pull request. Os cinco checks do commit `8164468` passaram no PR #2.
 
 ## Próximos passos
 
-- Confirmar no CI a revisão validada localmente com H2 e PostgreSQL 16.
+- Conferir os checks do commit com a migração V3 no PR #2 antes da integração.
 - Revisar autenticação e autorização antes de disponibilizar dados reais.
 - Testar concorrência entre a conclusão de projetos e alterações de tarefas; a suíte atual cobre cenários sequenciais.
 - Padronizar o domínio de status de projetos e tarefas em uma evolução compatível da API.
