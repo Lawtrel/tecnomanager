@@ -1,0 +1,16 @@
+services:
+  db_test:
+    image: postgres:16-alpine
+    ports:
+      - '127.0.0.1:55435:5432'
+    environment:
+      POSTGRES_DB: tecnomanager_test
+      POSTGRES_USER: tecnomanager_test
+      POSTGRES_PASSWORD: ${TEST_JDBC_PASSWORD:?Configure TEST_JDBC_PASSWORD para o banco descartavel}
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U tecnomanager_test -d tecnomanager_test']
+      interval: 2s
+      timeout: 3s
+      retries: 30

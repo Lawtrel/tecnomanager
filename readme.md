@@ -71,16 +71,43 @@ Os testes cobrem:
 - Status ausente, nulo, vazio ou desconhecido: HTTP 400 sem alterar o projeto.
 - JSON inválido e status inválido na criação: HTTP 400.
 - Disponibilidade do seed por perfil, incluindo combinações `local,prod` e `local,test`.
+- Tarefa atualizada pelo endereço de outro projeto: HTTP 404, sem alteração.
+- Título vazio e status desconhecido na criação de tarefas: HTTP 400; status omitido assume PENDENTE.
+- Status ausente, nulo, vazio ou desconhecido na atualização de tarefas: HTTP 400, sem alteração.
+- Conclusão de tarefa seguida da conclusão de seu projeto, incluindo normalização de status.
 
 Status de projeto aceitos: `PLANEJAMENTO`, `EM_PLANEJAMENTO`, `INICIADO`, `EM_ANDAMENTO` e `CONCLUIDO`. Os dois nomes de planejamento foram preservados por compatibilidade com as referências existentes. Espaços nas extremidades são removidos e letras são normalizadas para maiúsculas.
 
 Validação local em 26/09/2026: **26 testes, nenhuma falha, nenhum erro, nenhum teste ignorado; `verify` e empacotamento concluídos** com Java 21. A execução com H2 não substitui os testes em PostgreSQL e Docker.
 
-O workflow `.github/workflows/ci.yml` executa `verify` a cada push e pull request.
+Status de tarefas: `PENDENTE`, `EM_ANDAMENTO` e `CONCLUIDO`. A API aceita `CONCLUIDA` como alias e salva `CONCLUIDO`, compatível com as consultas do painel e com a regra de conclusão do projeto. Espaços e letras minúsculas são normalizados. A atualização verifica que a tarefa pertence ao projeto indicado na URL.
+
+### Integração com PostgreSQL 16
+
+O `compose.test.yaml` fornece um banco separado, em memória temporária do container, na porta de loopback 55435. Não utiliza o banco de desenvolvimento da porta 5432. Dentro de um PowerShell no repositório:
+
+```powershell
+$env:TEST_JDBC_URL = 'jdbc:postgresql://127.0.0.1:55435/tecnomanager_test'
+$env:TEST_JDBC_USERNAME = 'tecnomanager_test'
+$env:TEST_JDBC_PASSWORD = [Guid]::NewGuid().ToString('N')
+try {
+    docker compose -p tecnomanager-pg-validation -f compose.test.yaml up -d --wait db_test
+    if ($LASTEXITCODE -ne 0) { throw 'Falha ao iniciar o banco de testes.' }
+    .\mvnw.cmd --batch-mode --no-transfer-progress verify
+    if ($LASTEXITCODE -ne 0) { throw 'Os testes falharam.' }
+} finally {
+    docker compose -p tecnomanager-pg-validation -f compose.test.yaml down
+    Remove-Item Env:TEST_JDBC_URL, Env:TEST_JDBC_USERNAME, Env:TEST_JDBC_PASSWORD -ErrorAction SilentlyContinue
+}
+```
+
+Use uma sessão dedicada para esses comandos. Os testes de contexto recusam URLs diferentes do H2 em memória previsto ou desse destino PostgreSQL exato, com usuário `tecnomanager_test`, antes de inicializar Flyway. As operações HTTP de integração usam transações revertidas ao final. A suíte confirma também o produto do banco pela conexão JDBC, evitando chamar H2 de PostgreSQL real.
+
+Em 05/10/2026, a revisão complementar passou localmente com **36 testes em H2 e os mesmos 36 testes em PostgreSQL 16.15, zero falhas, erros ou testes ignorados, e empacotamento concluído nos dois bancos**. No PostgreSQL, as duas migrações Flyway foram aplicadas a um banco vazio e o Hibernate validou o schema. O workflow `.github/workflows/ci.yml` foi ampliado para dois jobs: H2 e PostgreSQL 16, ambos com `verify` a cada push e pull request; os checks dessa revisão ainda precisam ser conferidos após publicação.
 
 ## Próximos passos
 
-- Validar a inicialização com Docker/PostgreSQL em ambiente limpo e adicionar testes de integração nesse banco.
+- Confirmar no CI a revisão validada localmente com H2 e PostgreSQL 16.
 - Revisar autenticação e autorização antes de disponibilizar dados reais.
 - Testar concorrência entre a conclusão de projetos e alterações de tarefas; a suíte atual cobre cenários sequenciais.
 - Padronizar o domínio de status de projetos e tarefas em uma evolução compatível da API.
